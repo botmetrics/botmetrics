@@ -123,7 +123,7 @@ RSpec.describe Query do
   end
 
   describe '#to_form_params' do
-    let(:query) { build(:slack_query) }
+    let!(:query) { create(:slack_query) }
 
     it 'returns a hash' do
       expect(query.to_form_params).to eq({ provider: query.provider, field: query.field, method: query.method, value: query.value })

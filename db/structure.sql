@@ -403,7 +403,7 @@ CREATE TABLE queries (
     field character varying NOT NULL,
     method character varying NOT NULL,
     value character varying,
-    query_set_id integer,
+    query_set_id integer NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     min_value character varying,
@@ -1358,4 +1358,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160906040717');
 INSERT INTO schema_migrations (version) VALUES ('20160919061700');
 
 INSERT INTO schema_migrations (version) VALUES ('20160919065157');
+
+INSERT INTO schema_migrations (version) VALUES ('20161004235348');
 

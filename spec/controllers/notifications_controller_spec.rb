@@ -38,8 +38,8 @@ RSpec.describe NotificationsController do
   end
 
   describe '#show' do
+    let!(:query_set)    { create(:query_set, :with_slack_queries, bot: bot) }
     let!(:notification) { create(:notification, bot: bot, query_set: query_set) }
-    let!(:query_set)    { build(:query_set, :with_slack_queries, bot: bot) }
 
     def do_request
       get :show, bot_id: bot.uid, id: notification.uid

@@ -38,7 +38,8 @@ class QuerySetBuilder
         [
           :id, :_destroy,
           :provider, :field, :method, :value,
-          :min_value, :max_value
+          :min_value, :max_value,
+          :query_set_id
         ]
     )
   end

@@ -33,7 +33,7 @@ RSpec.describe QuerySet do
   end
 
   describe '#to_form_params' do
-    let(:query_set) { build(:query_set, :with_slack_queries, bot_id: 1) }
+    let(:query_set) { create(:query_set, :with_slack_queries) }
 
     it 'works' do
       expect(query_set.to_form_params).

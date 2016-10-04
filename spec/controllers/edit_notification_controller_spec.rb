@@ -3,8 +3,8 @@ RSpec.describe EditNotificationController do
   let!(:bot)  { create :bot }
   let!(:bc)   { create :bot_collaborator, bot: bot, user: user }
 
+  let!(:query_set)    { create(:query_set, :with_slack_queries, bot: bot) }
   let!(:notification) { create(:notification, bot: bot, query_set: query_set, scheduled_at: dt_fmt(10.days.from_now))}
-  let!(:query_set)    { build(:query_set, :with_slack_queries, bot: bot) }
 
   before { sign_in user }
 
