@@ -10,6 +10,11 @@ class QuerySetBuilder
 
   def query_set
     QuerySet.new(query_set_params).tap do |qs|
+      # FIXME: See if there is a better way to do this
+      # Validations on Query require Query#query_set to exist
+      # so we are explicitly setting them
+      qs.queries.each { |q| q.query_set = qs }
+
       qs.bot             ||= bot
       qs.instances_scope ||= instances_scope
       qs.time_zone       ||= time_zone

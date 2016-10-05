@@ -19,7 +19,7 @@ module Queries
       false
     end
 
-    def fields
+    def fields(bot)
       FIELDS
     end
 

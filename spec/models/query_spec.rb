@@ -15,6 +15,8 @@ RSpec.describe Query do
   end
 
   context 'validations' do
+    subject { create :query }
+
     it { is_expected.to validate_presence_of :provider }
     it { is_expected.to validate_inclusion_of(:provider).in_array(%w(slack kik facebook telegram)) }
 
@@ -22,7 +24,7 @@ RSpec.describe Query do
     it { is_expected.to validate_presence_of :method }
 
     context 'provider is slack (default)' do
-      subject { Query.new(provider: 'slack') }
+      subject { build :slack_query }
 
       it { is_expected.to validate_inclusion_of(:field).in_array(Queries::Slack::FIELDS.keys) }
 
@@ -38,36 +40,36 @@ RSpec.describe Query do
 
     context 'value' do
       context 'method is not "between"' do
-        subject { Query.new(method: ['equals_to', 'contains'].sample) }
+        subject { build(:slack_query, method: ['equals_to', 'contains'].sample) }
         it { is_expected.to validate_presence_of :value }
       end
 
       context 'method is "between"' do
-        subject { Query.new(method: 'between') }
+        subject { build(:slack_query, method: 'between') }
         it { is_expected.to_not validate_presence_of :value }
       end
     end
 
     context 'min_value' do
       context 'method is not "between"' do
-        subject { Query.new(method: ['equals_to', 'contains'].sample) }
+        subject { build(:slack_query, method: ['equals_to', 'contains'].sample) }
         it { is_expected.to_not validate_presence_of :min_value }
       end
 
       context 'method is "between"' do
-        subject { Query.new(method: 'between') }
+        subject { build(:slack_query, method: 'between') }
         it { is_expected.to validate_presence_of :min_value }
       end
     end
 
     context 'max_value' do
       context 'method is not "between"' do
-        subject { Query.new(method: ['equals_to', 'contains'].sample) }
+        subject { build(:slack_query, method: ['equals_to', 'contains'].sample) }
         it { is_expected.to_not validate_presence_of :max_value }
       end
 
       context 'method is "between"' do
-        subject { Query.new(method: 'between') }
+        subject { build(:slack_query, method: 'between') }
         it { is_expected.to validate_presence_of :max_value }
       end
     end

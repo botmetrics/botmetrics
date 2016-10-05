@@ -59,6 +59,14 @@ class App.Filter extends App.AppBase
             disable(parent, '.number-method')
             disable(parent, '.ago-method')
 
+          when $(@).val().match(/^dashboard:[0-9a-f]+$/)
+            enable(parent, '.datetime-method')
+
+            disable(parent, '.string-method')
+            disable(parent, '.number-method')
+            disable(parent, '.ago-method')
+
+
         $("[name$='[method]']:visible").change()
 
       $(document).on 'change', "[name$='[method]']", ->
@@ -71,7 +79,7 @@ class App.Filter extends App.AppBase
             disable(parent, '.equal-value')
             disable(parent, '.ago-value')
           when $(@).val() in ['lesser_than', 'greater_than']
-            if field.val() in ['interacted_at', 'user_created_at']
+            if field.val() in ['interacted_at', 'user_created_at'] || field.val().match(/^dashboard:[0-9a-f]+$/)
               enable(parent, '.ago-value')
               disable(parent, '.equal-value')
               disable(parent, '.range-value')
@@ -85,7 +93,7 @@ class App.Filter extends App.AppBase
             disable(parent, '.ago-value')
 
         if $(this).val() == 'between'
-          if field.val() in ['interacted_at', 'user_created_at']
+          if field.val() in ['interacted_at', 'user_created_at'] || field.val().match(/^dashboard:[0-9a-f]+$/)
             enable_datepicker(parent, "[name$='_value]']:visible")
           else
             disable_datepicker(parent, "[name$='_value]']:visible")

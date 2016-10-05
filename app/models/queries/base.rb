@@ -1,5 +1,19 @@
 module Queries
   class Base
+    DASHBOARDS = [
+      'user-actions',
+      'image-uploaded',
+      'video-uploaded',
+      'audio-uploaded',
+      'file-uploaded',
+      'location-sent',
+      'link-uploaded',
+      'scanned-data',
+      'sticker-uploaded',
+      'friend-picker-chosen',
+      'custom'
+    ]
+
     STRING_METHODS = {
       'equals_to' => 'Equals To',
       'contains'  => 'Contains'
@@ -23,11 +37,14 @@ module Queries
     end
 
     def is_datetime_query?(field)
-      field.in?(['interacted_at', 'user_created_at'])
+      field.in?(['interacted_at', 'user_created_at']) || field.match(/\Adashboard:[0-9a-f]+\Z/)
     end
 
     def fields(bot)
-      self.class::FIELDS
+      dashboard_hash = bot.dashboards.where(dashboard_type: DASHBOARDS, enabled: true).
+                        inject({}) { |hash, d| hash["dashboard:#{d.uid}"] = d.name; hash }
+
+      self.class::FIELDS.merge(dashboard_hash)
     end
 
     def string_methods

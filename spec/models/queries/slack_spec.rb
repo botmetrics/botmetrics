@@ -16,6 +16,8 @@ RSpec.describe Queries::Slack do
   end
 
   describe '#fields' do
+    let!(:bot) { create :bot }
+
     let(:values) { Hash[
                      'nickname', 'Nickname',
                      'email', 'Email',
@@ -26,7 +28,7 @@ RSpec.describe Queries::Slack do
                    ] }
 
     it 'should return proper values' do
-      expect(subject.fields).to eql values
+      expect(subject.fields(bot)).to eql values
     end
   end
 end
