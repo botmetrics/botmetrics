@@ -1,7 +1,7 @@
 .row.query
   = f.input :provider, as: :hidden
   .col-sm-3
-    = f.input :field,  label: false, collection: f.object.fields.invert,  include_blank: false
+    = f.input :field,  label: false, collection: f.object.fields(@bot).invert,  include_blank: false
   .col-sm-3
     .string-method.hide
       = f.input :method, label: false, collection: f.object.string_methods.invert,   include_blank: false

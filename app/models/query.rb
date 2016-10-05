@@ -5,7 +5,7 @@ class Query < ActiveRecord::Base
   validates_inclusion_of :provider, in: %w(slack kik facebook telegram)
 
   validates_presence_of  :field
-  validates_inclusion_of :field,  in: ->(query) { query.fields.keys }
+  validates_inclusion_of :field,  in: ->(query) { query.fields(query.query_set.bot).keys }
   validates_presence_of  :method
   validates_inclusion_of :method, in: ->(query) { query.string_methods.keys | query.number_methods.keys | query.datetime_methods.keys }
   validates_presence_of  :value,     if: ->(query) { query.method != 'between' }

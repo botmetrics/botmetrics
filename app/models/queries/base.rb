@@ -26,7 +26,7 @@ module Queries
       field.in?(['interacted_at', 'user_created_at'])
     end
 
-    def fields
+    def fields(bot)
       self.class::FIELDS
     end
 
