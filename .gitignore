@@ -20,3 +20,5 @@
 .DS_Store
 
 *.pid*
+
+dump.rdb
