@@ -37,13 +37,12 @@ module Queries
     end
 
     def is_datetime_query?(field)
-      field.in?(['interacted_at', 'user_created_at']) || field.match(/\Adashboard:[0-9a-f]+\Z/)
+      field.in?(['interacted_at', 'user_created_at']) || field.match(/\Adashboard:[0-9a-f]+\Z/).present?
     end
 
     def fields(bot)
       dashboard_hash = bot.dashboards.where(dashboard_type: DASHBOARDS, enabled: true).
                         inject({}) { |hash, d| hash["dashboard:#{d.uid}"] = d.name; hash }
-
       self.class::FIELDS.merge(dashboard_hash)
     end
 

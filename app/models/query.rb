@@ -34,4 +34,10 @@ class Query < ActiveRecord::Base
   def to_form_params
     { provider: provider, field: field, method: method, value: value }
   end
+
+  def dashboard
+    dashboard_uid = self.field.match(/\Adashboard:([0-9a-f]+)\Z/)[1]
+    bot = self.query_set.bot
+    bot.dashboards.find_by(uid: dashboard_uid)
+  end
 end

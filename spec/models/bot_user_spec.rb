@@ -21,6 +21,7 @@ RSpec.describe BotUser do
   end
 
   context 'scopes' do
+    let!(:query)      { create(:query) }
     let!(:user)       { create(:user) }
     let!(:bot)        { create(:bot) }
     let!(:instance) { create(:bot_instance, :with_attributes, uid: '123', bot: bot) }
@@ -53,24 +54,78 @@ RSpec.describe BotUser do
 
     describe '.user_signed_up_betw' do
       let(:one_week_user) { create(:bot_user, created_at: 7.days.ago) }
-      it { expect(BotUser.user_signed_up_betw(8.days.ago, 5.days.ago)).to eq [one_week_user] }
+      it { expect(BotUser.user_signed_up_betw(query, 8.days.ago, 5.days.ago)).to eq [one_week_user] }
     end
 
     describe '.user_signed_up_gt' do
       let(:one_week_user) { create(:bot_user, created_at: 7.days.ago) }
 
-      it { expect(BotUser.user_signed_up_gt(5.days.ago)).to eq [one_week_user] }
+      it { expect(BotUser.user_signed_up_gt(query, 5.days.ago)).to eq [one_week_user] }
     end
 
     describe '.user_signed_up_lt' do
       let(:one_week_user) { create(:bot_user, created_at: 7.days.ago) }
 
-      it { expect(BotUser.user_signed_up_lt(5.days.ago)).to eq [bot_user_1, bot_user_2] }
+      it { expect(BotUser.user_signed_up_lt(query, 5.days.ago)).to eq [bot_user_1, bot_user_2] }
+    end
+  end
+
+  context 'dashboard related scopes' do
+    let!(:timezone)   { 'Pacific Time (US & Canada)' }
+    let!(:bot)        { create :bot }
+    let!(:dashboard)  { create :dashboard, bot: bot, dashboard_type: 'custom', regex: 'abc' }
+    let!(:query_set)  { create :query_set, bot: bot }
+    let!(:query)      { build  :query, query_set: query_set, field: "dashboard:#{dashboard.uid}" }
+
+    before { travel_to Time.current }
+    after { travel_back }
+
+    let!(:user_1) { create(:bot_user) }
+    let!(:user_2) { create(:bot_user) }
+    let!(:user_3) { create(:bot_user) }
+    let!(:user_4) { create(:bot_user) }
+    let!(:user_5) { create(:bot_user) }
+
+    let!(:event_1) { create :event, user: user_1, created_at: 1.day.ago }
+    let!(:event_2) { create :event, user: user_2, created_at: 2.days.ago }
+    let!(:event_3) { create :event, user: user_3, created_at: 3.days.ago }
+    let!(:event_4) { create :event, user: user_4, created_at: 4.days.ago }
+    let!(:event_5) { create :event, user: user_5, created_at: 5.days.ago }
+
+    let!(:dashboard_event_1) { create :dashboard_event, dashboard: dashboard, event: event_1 }
+    let!(:dashboard_event_2) { create :dashboard_event, dashboard: dashboard, event: event_2 }
+    let!(:dashboard_event_3) { create :dashboard_event, dashboard: dashboard, event: event_3 }
+    let!(:dashboard_event_4) { create :dashboard_event, dashboard: dashboard, event: event_4 }
+    let!(:dashboard_event_5) { create :dashboard_event, dashboard: dashboard, event: event_5 }
+
+    describe '.dashboard_betw' do
+      it 'return users that performed events connected to a given dashboard between the time range' do
+        result = BotUser.dashboard_betw(query, 3.days.ago - 1.second, 3.days.ago + 1.second).map(&:id)
+
+        expect(result).to match_array [user_3.id]
+      end
+    end
+
+    describe '.dashboard_lt' do
+      it 'return users that performed events connected to a given dashboard lesser than given days ago' do
+        result = BotUser.dashboard_lt(query, 3.days.ago).map(&:id)
+
+        expect(result).to match_array [user_1.id, user_2.id]
+      end
+    end
+
+    describe '.dashboard_gt' do
+      it 'return users that performed events connected to a given dashboard greater than given days ago' do
+        result = BotUser.dashboard_gt(query, 3.days.ago).map(&:id)
+
+        expect(result).to match_array [user_4.id, user_5.id]
+      end
     end
   end
 
   context 'interacted related scopes' do
     let(:timezone) { 'Pacific Time (US & Canada)' }
+    let(:query)    { create :query }
 
     before { travel_to Time.current }
     after { travel_back }
@@ -83,7 +138,7 @@ RSpec.describe BotUser do
 
     describe '.interacted_at_betw' do
       it 'return users that interacted ago is within given range' do
-        result = BotUser.interacted_at_betw(3.days.ago - 1.second, 3.days.ago + 1.second).map(&:id)
+        result = BotUser.interacted_at_betw(query, 3.days.ago - 1.second, 3.days.ago + 1.second).map(&:id)
 
         expect(result).to match_array [user_3_id]
       end
@@ -91,7 +146,7 @@ RSpec.describe BotUser do
 
     describe '.interacted_at_lt' do
       it 'return users that interacted is lesser than given days ago' do
-        result = BotUser.interacted_at_lt(3.days.ago).map(&:id)
+        result = BotUser.interacted_at_lt(query, 3.days.ago).map(&:id)
 
         expect(result).to match_array [user_1_id, user_2_id]
       end
@@ -99,7 +154,7 @@ RSpec.describe BotUser do
 
     describe '.interacted_at_gt' do
       it 'return users that interacted is greater than given days ago' do
-        result = BotUser.interacted_at_gt(3.days.ago).map(&:id)
+        result = BotUser.interacted_at_gt(query, 3.days.ago).map(&:id)
 
         expect(result).to match_array [user_4_id, user_5_id]
       end

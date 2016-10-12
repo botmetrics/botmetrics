@@ -16,22 +16,26 @@ RSpec.describe FilterBotUsersService do
     let!(:bot_user_6) { create(:bot_user, bot_instance: instance_2, user_attributes: { nickname: 'mikey', email: 'mikey@example.com' }) }
     ##### These do not appear - END
 
+    let(:query_set) { create(:query_set, bot: bot, instances_scope: :legit, time_zone: user.timezone) }
     let(:service)   { FilterBotUsersService.new(query_set) }
-    let(:query_set) { QuerySet.new(bot: bot, instances_scope: :legit, time_zone: user.timezone, queries: queries)}
 
     context 'slack' do
       let(:provider) { 'slack' }
 
       context 'empty query' do
-        let(:queries)   { [Query.new(provider: provider, field: :nickname, method: :contains, value: nil)] }
+        before do
+          create(:query, provider: provider, field: :nickname, method: :contains, value: 'abc', query_set: query_set)
+        end
 
-        it 'returns all' do
-          expect(service.scope.map(&:id)).to eq [bot_user_1, bot_user_2, bot_user_3].map(&:id)
+        it 'returns nothing' do
+          expect(service.scope.map(&:id)).to eq []
         end
       end
 
       context 'one query' do
-        let(:queries)   { [Query.new(provider: provider, field: :nickname, method: :contains, value: 'sean')] }
+        before do
+          create(:query, provider: provider, field: :nickname, method: :contains, value: 'sean', query_set: query_set)
+        end
 
         it 'returns filtered' do
           expect(service.scope.map(&:id)).to eq [bot_user_2].map(&:id)
@@ -39,11 +43,9 @@ RSpec.describe FilterBotUsersService do
       end
 
       context 'many queries' do
-        let(:queries) do
-          [
-            Query.new(provider: provider, field: :nickname, method: :contains, value: 'mike'),
-            Query.new(provider: provider, field: :email,    method: :contains, value: 'example')
-          ]
+        before do
+          create(:query, provider: provider, field: :nickname, method: :contains, value: 'mike', query_set: query_set)
+          create(:query, provider: provider, field: :email,    method: :contains, value: 'example', query_set: query_set)
         end
 
         it 'returns filtered' do
@@ -52,14 +54,35 @@ RSpec.describe FilterBotUsersService do
       end
 
       context 'datetime queries' do
+        context 'dashboard queries' do
+          let!(:dashboard)      { create :dashboard, bot: bot, dashboard_type: 'custom', regex: 'abc' }
+          let!(:included_user)  { create :bot_user, bot_instance: instance_1 }
+          let!(:excluded_user)  { create :bot_user, bot_instance: instance_1 }
+          let!(:event_1)        { create :event, created_at: 3.days.ago, user: included_user }
+          let!(:event_2)        { create :event, created_at: 5.days.ago, user: excluded_user }
+          let!(:de1)            { create :dashboard_event, dashboard: dashboard, event: event_1 }
+          let!(:de2)            { create :dashboard_event, dashboard: dashboard, event: event_2 }
+
+          before do
+            create(:query,
+              provider: provider, field: "dashboard:#{dashboard.uid}", method: :between,
+              min_value: 4.days.ago, max_value: 2.days.ago,
+              query_set: query_set
+            )
+          end
+
+          it 'returns filtered' do
+            expect(service.scope.map(&:id)).to match_array [included_user.id]
+          end
+        end
+
         context 'interacted_at' do
-          let(:queries) do
-            [
-              Query.new(
-                provider: provider, field: :interacted_at, method: :between,
-                min_value: 4.days.ago, max_value: 2.days.ago
-              )
-            ]
+          before do
+            create(:query,
+              provider: provider, field: :interacted_at, method: :between,
+              min_value: 4.days.ago, max_value: 2.days.ago,
+              query_set: query_set
+            )
           end
 
           it 'returns filtered' do
@@ -68,13 +91,12 @@ RSpec.describe FilterBotUsersService do
         end
 
         context 'user_created_at' do
-          let(:queries) do
-            [
-              Query.new(
-                provider: provider, field: :user_created_at, method: :between,
-                min_value: 8.days.ago, max_value: 6.days.ago
-              )
-            ]
+          before do
+            create(:query,
+              provider: provider, field: :user_created_at, method: :between,
+              min_value: 8.days.ago, max_value: 6.days.ago,
+              query_set: query_set
+            )
           end
 
           it 'returns filtered' do

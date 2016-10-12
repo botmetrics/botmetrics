@@ -38,30 +38,42 @@ class BotUser < ActiveRecord::Base
     where('bot_interaction_count BETWEEN ? AND ?', min, max)
   end
 
-  scope :interacted_at_betw, ->(min, max) do
+  scope :interacted_at_betw, ->(query, min, max) do
     where('last_interacted_with_bot_at BETWEEN ? AND ?', min, max).
     order("last_interacted_with_bot_at DESC NULLS LAST")
   end
 
-  scope :interacted_at_lt, ->(days_ago) do
+  scope :dashboard_betw, ->(query, min, max) do
+    where(id: query.dashboard.events.where("events.created_at" => min..max).select(:bot_user_id))
+  end
+
+  scope :dashboard_gt, ->(query, days_ago) do
+    where(id: query.dashboard.events.where("events.created_at < ?", days_ago).select(:bot_user_id))
+  end
+
+  scope :dashboard_lt, ->(query, days_ago) do
+    where(id: query.dashboard.events.where("events.created_at > ?", days_ago).select(:bot_user_id))
+  end
+
+  scope :interacted_at_lt, ->(query, days_ago) do
     where('last_interacted_with_bot_at > ?', days_ago).
     order("last_interacted_with_bot_at DESC NULLS LAST")
   end
 
-  scope :interacted_at_gt, ->(days_ago) do
+  scope :interacted_at_gt, ->(query, days_ago) do
     where('last_interacted_with_bot_at < ?', days_ago).
     order("last_interacted_with_bot_at DESC NULLS LAST")
   end
 
-  scope :user_signed_up_gt, ->(days_ago) do
+  scope :user_signed_up_gt, ->(query, days_ago) do
     where('created_at < ?', days_ago)
   end
 
-  scope :user_signed_up_lt, ->(days_ago) do
+  scope :user_signed_up_lt, ->(query, days_ago) do
     where('created_at > ?', days_ago)
   end
 
-  scope :user_signed_up_betw, ->(min, max) do
+  scope :user_signed_up_betw, ->(query, min, max) do
     where(created_at: min..max)
   end
 

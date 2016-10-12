@@ -7,7 +7,6 @@ class FilterBotUsersService
 
   def scope
     collection = query_set.initial_user_collection
-
     query_set.queries.each do |query|
       next if query.value.blank? && (query.min_value.blank? || query.max_value.blank?)
 
@@ -65,10 +64,18 @@ class FilterBotUsersService
 
   # Currently only for interacted_at and BotUser's created_at
   def chain_with_datetime_query(collection, query)
-    case query.method
+    case query.method.to_s
     when 'between'
-      method = query.field == 'user_created_at' ? :user_signed_up_betw : :interacted_at_betw
+      method = if query.field == 'user_created_at'
+                 :user_signed_up_betw
+               elsif query.field == 'interacted_at'
+                 :interacted_at_betw
+               elsif query.field =~ /\Adashboard:[0-9a-f]+\Z/
+                 :dashboard_betw
+               end
+
       collection.send(method,
+        query,
         query.min_value.in_time_zone(query_set.time_zone),
         query.max_value.in_time_zone(query_set.time_zone)
       )
@@ -80,10 +87,12 @@ class FilterBotUsersService
       method = if query.field == 'user_created_at'
         query.method == 'greater_than' ? :user_signed_up_gt : :user_signed_up_lt
       elsif query.field == 'interacted_at'
-        query.method == 'greater_than' ? :interacted_at_gt: :interacted_at_lt
+        query.method == 'greater_than' ? :interacted_at_gt : :interacted_at_lt
+      elsif query.field =~ /\Adashboard:[0-9a-f]+\Z/
+        query.method == 'greater_than' ? :dashboard_gt : :dashboard_lt
       end
 
-      collection.send(method, beginning_of_that_days_ago)
+      collection.send(method, query, beginning_of_that_days_ago)
     end
   end
 
