@@ -22,7 +22,7 @@ default: &default
   pool: 5
   username: postgres
   password:
-  host: db
+  host:
 
 development:
   <<: *default
