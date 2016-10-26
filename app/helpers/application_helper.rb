@@ -12,6 +12,8 @@ module ApplicationHelper
       'active'
     elsif controller.controller_name == 'insights' && link == 'analyze'
       'active'
+    elsif controller.controller_name == 'retention' && link == 'retention'
+      'active'
     end
   end
 

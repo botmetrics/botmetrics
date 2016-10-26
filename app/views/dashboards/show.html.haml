@@ -23,7 +23,7 @@
         %h3
           Messages Matching:
           %pre= "\"#{@dashboard.regex}\""
-    .col-md-123.col-sm-12.col-xs-12.graph-container
+    .col-md-12.col-sm-12.col-xs-12.graph-container
       = line_chart @dashboard.data, solo_chartjs_opts(@group_by)
       = render 'table', dashboard: @dashboard
       = will_paginate @dashboard.tableized, renderer: BootstrapPagination::Rails

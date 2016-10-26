@@ -6,7 +6,8 @@ body.dashboards,
 body.notifications,
 body.new_notification,
 body.edit_notification,
-body.insights
+body.insights,
+body.retention.index
   .update-instance
     display: none
   .integrate-cta
@@ -99,7 +100,8 @@ body.notifications,
 body.new_notification,
 body.edit_notification,
 body.users,
-body.insights
+body.insights,
+body.retention.index
   &.edit
     h2.api
       padding-top: 10px
@@ -208,7 +210,8 @@ body.new_notification,
 body.edit_notification,
 body.users,
 body.bot_instances,
-body.insights
+body.insights,
+body.retention.index
   background-color: rgba(227,231,242, 0.1)
   .secondary-menu
     background-color: #fff
@@ -390,3 +393,9 @@ body.bot_instances.new
     padding-top: 20px
   .onboarding-tips
     padding-top: 20px
+
+body.retention.index
+  #retention
+    min-height: 550px
+  .retention-details
+    font-size: 20px

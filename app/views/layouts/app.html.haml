@@ -43,6 +43,10 @@
                 = icon('pie-chart')
                 Insights
             %li
+              = link_to bot_retention_index_path(@bot), class: menu_class('retention') do
+                = icon('refresh')
+                Retention
+            %li
               = link_to bot_notifications_path(@bot), class: menu_class('notifications') do
                 = icon('comment')
                 Notifications

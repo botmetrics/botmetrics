@@ -1,0 +1,20 @@
+.secondary-menu.row
+  .col-md-5.col-sm-3.col-xs-6
+    = link_to bot_dashboards_path(@bot), class: 'breadcrumb' do
+      %h2 All Metrics
+    %span.breadcrumb-separator
+      \/
+    %h2
+      Retention
+
+.container-fluid.retention-container
+  .graph.row
+    .col-md-12.col-sm-12.col-xs-12#retention
+    .retention-details.text-center
+      %p.retention-details
+        Each cohort represents users that signed up in that week and interacted with your bot at least once.
+
+- content_for :page_scripts do
+  :javascript
+    App.page = new App.RetentionIndex(#{@retention.to_json}, #{8.weeks.ago.beginning_of_week.to_json});
+    App.page.run();

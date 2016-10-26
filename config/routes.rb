@@ -18,6 +18,8 @@ Rails.application.routes.draw do
       end
     end
 
+    resources :retention, only: [:index]
+
     resources :notifications, except: [:new, :create, :edit, :update]
     resources :new_notification, only: [:create] do
       collection do

@@ -263,4 +263,54 @@ RSpec.describe BotUser do
       expect(users.map(&:id)).to eq [bu.id]
     end
   end
+
+  describe '.by_cohort' do
+    let!(:bot) { create :bot }
+    let!(:bi1) { create :bot_instance, bot: bot }
+    let!(:bi2) { create :bot_instance, bot: bot }
+
+    before do
+      travel_to Time.current
+      @start_time = 8.weeks.ago.beginning_of_week
+
+      @users = []
+
+      # Create users for 8 weeks, each week starts with 10 users
+      count = 1
+
+      9.times do |i|
+        sub_users = []
+        (10*count).times do
+          sub_users << create(:bot_user, bot_instance: bi1, created_at: @start_time + i.weeks + 1.hour)
+        end
+        @users << sub_users
+        count += 1
+      end
+
+      @users.each_with_index do |sub_users, index|
+        # Every user is active in the first week
+        sub_users.each do |user|
+          create(:event, bot_instance: bi1, is_for_bot: true, user: user, created_at: @start_time + index.weeks + 1.hour)
+          create(:event, bot_instance: bi1, is_for_bot: false, user: user, created_at: @start_time + index.weeks + 1.hour)
+        end
+        count = 1
+        (index+1...9).each do |j|
+          (0...sub_users.length-count).each do |idx|
+            user = sub_users[idx]
+            create(:event, bot_instance: bi1, is_for_bot: true, user: user, created_at: @start_time + j.weeks + 1.hour)
+            create(:event, bot_instance: bi1, is_for_bot: false, user: user, created_at: @start_time + j.weeks + 1.hour)
+          end
+          count += 1
+        end
+      end
+    end
+
+    after { travel_back }
+
+    it 'should return the number of users per cohort' do
+      expect(BotUser.by_cohort(bot, start_time: 8.weeks.ago)).to eql [10, 9, 8, 7, 6, 5, 4, 3, 2]
+      expect(BotUser.by_cohort(bot, start_time: 7.weeks.ago)).to eql [20, 19, 18, 17, 16, 15, 14, 13]
+      expect(BotUser.by_cohort(bot, start_time: 6.weeks.ago)).to eql [30, 29, 28, 27, 26, 25, 24]
+    end
+  end
 end

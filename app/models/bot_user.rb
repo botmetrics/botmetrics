@@ -134,4 +134,51 @@ class BotUser < ActiveRecord::Base
     where("bot_users.id IN (?)", associated_bot_user_ids).
     order("last_event_at DESC NULLS LAST")
   end
+
+  def self.by_cohort(bot, start_time: 8.weeks.ago, group_by: 'week')
+    start_time = start_time.beginning_of_week
+    end_time = Time.current.end_of_week
+    # number of weeks
+    periods = ((end_time.to_i - start_time.to_i).to_f / (24 * 60 * 60 * 7)).ceil
+
+    bot_instance_ids = bot.instances.pluck("bot_instances.id")
+    first_cohort = sanitize_sql_hash_for_conditions("esub.created_at" => start_time..start_time.end_of_week)
+    users_condition = sanitize_sql_hash_for_conditions("bot_users.created_at" => start_time..start_time.end_of_week)
+    bot_condition = sanitize_sql_hash_for_conditions("esub.bot_instance_id" => bot_instance_ids)
+
+    counts = []
+    periods.times { |i| counts << "COUNT(DISTINCT e#{i+1}.bot_user_id)" }
+
+    sql = ["SELECT"]
+    sql << counts.join(",")
+    sql << "FROM"
+    sql << """
+    (
+      SELECT * FROM events esub
+      INNER JOIN bot_users ON bot_users.id = esub.bot_user_id
+      WHERE #{first_cohort}
+      AND #{bot_condition}
+      AND #{users_condition}
+      AND esub.is_for_bot = 't'
+    ) e1
+    """
+
+    (2..periods).each do |i|
+      next_cohort = sanitize_sql_hash_for_conditions("esub.created_at" => (start_time + (i-1).week)..(start_time + (i-1).week).end_of_week)
+      sql << """
+        LEFT OUTER JOIN LATERAL (
+         SELECT * FROM events esub
+         WHERE esub.bot_user_id = e#{i-1}.bot_user_id
+         AND #{next_cohort}
+         AND #{bot_condition}
+         AND esub.is_for_bot = 't'
+         LIMIT 1
+        ) e#{i}
+        ON true
+      """
+    end
+
+    records = Event.connection.execute(sql.join("\n"))
+    records.values.first.map(&:to_i)
+  end
 end
