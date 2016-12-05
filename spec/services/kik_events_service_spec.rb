@@ -255,6 +255,7 @@ RSpec.describe KikEventsService do
           }
         ]
       }
+
       let(:event_type) { 'message:image-uploaded' }
 
       context "bot user exists" do
@@ -314,6 +315,7 @@ RSpec.describe KikEventsService do
           }
         ]
       }
+
       let(:event_type) { 'message:start-chatting' }
 
       context "bot user exists" do
