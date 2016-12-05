@@ -10,6 +10,8 @@ support for other messaging platforms coming soon.
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/botmetrics/botmetrics)
 
+<a href="https://myrskyt.com/container/deploy/https://github.com/myrskyt/python-sample"><img src="https://myrskyt.com/static/img/button.jpg" height="40" width="155"></a>
+
 ### [Deploy to AWS](#deploying-botmetrics-to-aws-with-convox)
 
 ## Analytics
