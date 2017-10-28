@@ -51,12 +51,13 @@ re-engagement notifications based on pre-selected criteria.
 ## Development
 
 1. `cp .env-example .env`
-2. Start Redis & Postgres (there's a `./script/redis` and
+2. `cp config/database.yml.sample config/database.yml`
+3. Start Redis & Postgres (there's a `./script/redis` and
    `./script/dbstart` command that lets you do this easily)
-3. Run `./script/dbreset` to reset the database (creates a new one,
+4. Run `./script/dbreset` to reset the database (creates a new one,
    loads schema and runs `rake db:seed`)
-4. Run `./script/server` to start the server
-5. Visit [localhost:3000](http://localhost:3000)
+5. Run `./script/server` to start the server
+6. Visit [localhost:3000](http://localhost:3000)
 
 ## Contributing
 
